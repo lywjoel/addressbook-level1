@@ -88,6 +88,7 @@ public class AddressBook {
     private static final String MESSAGE_ERROR_READING_FROM_FILE = "Unexpected error: unable to read from file: %1$s";
     private static final String MESSAGE_ERROR_WRITING_TO_FILE = "Unexpected error: unable to write to file: %1$s";
     private static final String MESSAGE_PERSONS_FOUND_OVERVIEW = "%1$d persons found!";
+    private static final String MESSAGE_PERSONS_SORTED = "Address Book sorted!";
     private static final String MESSAGE_STORAGE_FILE_CREATED = "Created new empty storage file: %1$s";
     private static final String MESSAGE_WELCOME = "Welcome to your Address Book!";
     private static final String MESSAGE_USING_DEFAULT_FILE = "Using default storage file : " + DEFAULT_STORAGE_FILEPATH;
@@ -137,6 +138,11 @@ public class AddressBook {
     private static final String COMMAND_SORT_WORD = "sort";
     private static final String COMMAND_SORT_DESC = "Lists the persons in the address book in alphabetical order.";
     private static final String COMMAND_SORT_EXAMPLE = COMMAND_SORT_WORD;
+
+    private static final String COMMAND_EDIT_WORD = "edit";
+    private static final String COMMAND_EDIT_DESC = "Edits a person's entry in the address book.";
+    private static final String COMMAND_EDIT_PARAMETERS = "[INDEX] [FIELD TO EDIT] [NEW VALUE]";
+    private static final String COMMAND_EDIT_EXAMPLE = COMMAND_EDIT_WORD + " 1 NAME John Doe";
 
     private static final String DIVIDER = "===================================================";
 
@@ -388,6 +394,8 @@ public class AddressBook {
             executeExitProgramRequest();
         case COMMAND_SORT_WORD:
             return executeSortPersons();
+        case COMMAND_EDIT_WORD:
+            return executeEditPerson(commandArgs);
         default:
             return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
         }
@@ -433,6 +441,35 @@ public class AddressBook {
         final HashMap<PersonProperty, String> personToAdd = decodeResult.get();
         addPersonToAddressBook(personToAdd);
         return getMessageForSuccessfulAddPerson(personToAdd);
+    }
+
+    /**
+     * Adds a person (specified by the command args) to the address book.
+     * The entire command arguments string is treated as a string representation of the person to add.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
+    private static String executeEditPerson(String commandArgs) {
+        String[] commands = commandArgs.split(" ", 3);
+        if (commands.length != 3 || Integer.parseInt(commands[0]) > ALL_PERSONS.size()) {
+            return getMessageForInvalidCommandInput(COMMAND_EDIT_WORD, getUsageInfoForEditCommand());
+        }
+        // edit the person as specified
+        HashMap<PersonProperty, String> personToEdit = ALL_PERSONS.get(Integer.parseInt(commands[0]) - 1);
+        switch (commands[1]) {
+            case "NAME":
+                personToEdit.replace(PersonProperty.NAME, commands[2]);
+                return "Name succesfully changed!";
+            case "PHONE":
+                personToEdit.replace(PersonProperty.PHONE, removePrefixSign(commands[2], PERSON_DATA_PREFIX_PHONE));
+                return "Phone succesfully changed!";
+            case "EMAIL":
+                personToEdit.replace(PersonProperty.EMAIL, removePrefixSign(commands[2], PERSON_DATA_PREFIX_EMAIL));
+                return "Email succesfully changed!";
+            default:
+                return getMessageForInvalidCommandInput(COMMAND_EDIT_WORD, getUsageInfoForEditCommand());
+        }
     }
 
     /**
@@ -600,7 +637,7 @@ public class AddressBook {
         ArrayList<HashMap<PersonProperty, String>> toBeDisplayed = getAllPersonsInAddressBook();
         toBeDisplayed.sort((a, b) -> a.get(PersonProperty.NAME).compareTo(b.get(PersonProperty.NAME)));
         showToUser(toBeDisplayed);
-        return getMessageForPersonsDisplayedSummary(toBeDisplayed);
+        return MESSAGE_PERSONS_SORTED;
     }
 
     /*
@@ -1106,6 +1143,7 @@ public class AddressBook {
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS
                 + getUsageInfoForSortCommand() + LS
+                + getUsageInfoForEditCommand() + LS
                 + getUsageInfoForHelpCommand();
     }
 
@@ -1158,6 +1196,13 @@ public class AddressBook {
     private static String getUsageInfoForSortCommand() {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_SORT_WORD, COMMAND_SORT_DESC)
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_SORT_EXAMPLE);
+    }
+
+    /** Returns the string for showing 'edit' command usage instruction */
+    private static String getUsageInfoForEditCommand() {
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_EDIT_WORD, COMMAND_EDIT_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_EDIT_PARAMETERS) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_EDIT_EXAMPLE) + LS;
     }
 
     /*
