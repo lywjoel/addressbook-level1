@@ -152,7 +152,7 @@ public class AddressBook {
      * used by the internal String[] storage format.
      * For example, a person's name is stored as the 0th element in the array.
      */
-    private enum PersonProperty {NAME, EMAIL, PHONE};
+    private enum PersonProperty { NAME, EMAIL, PHONE };
 
     /**
      * The number of data elements for a single person.
@@ -444,8 +444,8 @@ public class AddressBook {
     }
 
     /**
-     * Adds a person (specified by the command args) to the address book.
-     * The entire command arguments string is treated as a string representation of the person to add.
+     * Edits a person's information (specified by the command args) to the address book.
+     * The entire command arguments string is treated as a string representation of the information to edit.
      *
      * @param commandArgs full command args string from the user
      * @return feedback display message for the operation result
@@ -458,17 +458,17 @@ public class AddressBook {
         // edit the person as specified
         HashMap<PersonProperty, String> personToEdit = ALL_PERSONS.get(Integer.parseInt(commands[0]) - 1);
         switch (commands[1]) {
-            case "NAME":
-                personToEdit.replace(PersonProperty.NAME, commands[2]);
-                return "Name succesfully changed!";
-            case "PHONE":
-                personToEdit.replace(PersonProperty.PHONE, removePrefixSign(commands[2], PERSON_DATA_PREFIX_PHONE));
-                return "Phone succesfully changed!";
-            case "EMAIL":
-                personToEdit.replace(PersonProperty.EMAIL, removePrefixSign(commands[2], PERSON_DATA_PREFIX_EMAIL));
-                return "Email succesfully changed!";
-            default:
-                return getMessageForInvalidCommandInput(COMMAND_EDIT_WORD, getUsageInfoForEditCommand());
+        case "NAME":
+            personToEdit.replace(PersonProperty.NAME, commands[2]);
+            return "Name succesfully changed!";
+        case "PHONE":
+            personToEdit.replace(PersonProperty.PHONE, removePrefixSign(commands[2], PERSON_DATA_PREFIX_PHONE));
+            return "Phone succesfully changed!";
+        case "EMAIL":
+            personToEdit.replace(PersonProperty.EMAIL, removePrefixSign(commands[2], PERSON_DATA_PREFIX_EMAIL));
+            return "Email succesfully changed!";
+        default:
+            return getMessageForInvalidCommandInput(COMMAND_EDIT_WORD, getUsageInfoForEditCommand());
         }
     }
 
