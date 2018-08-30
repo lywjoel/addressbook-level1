@@ -451,12 +451,16 @@ public class AddressBook {
      * @return feedback display message for the operation result
      */
     private static String executeEditPerson(String commandArgs) {
-        String[] commands = commandArgs.split(" ", 3);
-        if (commands.length != 3 || Integer.parseInt(commands[0]) > ALL_PERSONS.size()) {
+        static final int COMMAND_ARGS_LENGTH = 3;
+        String[] commands = commandArgs.split(" ", COMMAND_ARGS_LENGTH);
+        int index = Integer.parseInt(commands[0]);
+        boolean hasThreeArguments = commands.length == COMMAND_ARGS_LENGTH;
+        boolean isOutOfBounds = index > ALL_PERSONS.size();
+        if (!hasThreeArguments || isOutOfBounds) {
             return getMessageForInvalidCommandInput(COMMAND_EDIT_WORD, getUsageInfoForEditCommand());
         }
         // edit the person as specified
-        HashMap<PersonProperty, String> personToEdit = ALL_PERSONS.get(Integer.parseInt(commands[0]) - 1);
+        HashMap<PersonProperty, String> personToEdit = ALL_PERSONS.get(index - 1);
         switch (commands[1]) {
         case "NAME":
             personToEdit.replace(PersonProperty.NAME, commands[2]);
@@ -586,7 +590,9 @@ public class AddressBook {
      * @return whether it is valid
      */
     private static boolean isDisplayIndexValidForLastPersonListingView(int index) {
-        return index >= DISPLAYED_INDEX_OFFSET && index < latestPersonListingView.size() + DISPLAYED_INDEX_OFFSET;
+        boolean isIndexGreaterThanOffset = index >= DISPLAYED_INDEX_OFFSET;
+        boolean isIndexValid = index < latestPersonListingView.size() + DISPLAYED_INDEX_OFFSET;
+        return isIndexGreaterThanOffset && isIndexValid;
     }
 
     /**
@@ -656,7 +662,9 @@ public class AddressBook {
         System.out.print(LINE_PREFIX + "Enter command: ");
         String inputLine = SCANNER.nextLine();
         // silently consume all blank and comment lines
-        while (inputLine.trim().isEmpty() || inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER) {
+        boolean isLineEmpty = inputLine.trim().isEmpty();
+        boolean isCommentLine = inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER;
+        while (isLineEmpty || isCommentLine) {
             inputLine = SCANNER.nextLine();
         }
         return inputLine;
@@ -1011,7 +1019,8 @@ public class AddressBook {
     private static boolean isPersonDataExtractableFrom(String personData) {
         final String matchAnyPersonDataPrefix = PERSON_DATA_PREFIX_PHONE + '|' + PERSON_DATA_PREFIX_EMAIL;
         final String[] splitArgs = personData.trim().split(matchAnyPersonDataPrefix);
-        return splitArgs.length == 3 // 3 arguments
+        static final int COMMAND_ARGS_LENGTH = 3;
+        return splitArgs.length == COMMAND_ARGS_LENGTH // 3 arguments
                 && !splitArgs[0].isEmpty() // non-empty arguments
                 && !splitArgs[1].isEmpty()
                 && !splitArgs[2].isEmpty();
